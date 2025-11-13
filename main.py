@@ -18,7 +18,7 @@ os.environ["TIKTOKEN_CACHE_DIR"] = tiktoken_cache_dir
 # Disable SSL verification warnings
 client = httpx.Client(verify=False)
 
-# LLM and Embedding setustp
+# LLM and Embedding setup
 llm = ChatOpenAI(
     base_url="https://genailab.tcs.in",
     model="azure_ai/genailab-maas-DeepSeek-V3-0324",
@@ -64,7 +64,7 @@ if upload_file:
     retriever = vectordb.as_retriever(search_type="similarity", search_kwargs={"k": 5})
 
     prompt = ChatPromptTemplate.from_template(
-        "Use the following context to answer the question:\n\n{context}\n\nQuestion: {question}"
+        "Use the following context to answer the question:\n\n{context}\n\nQuestion: {question} and if user ask question not related to context answer only reply the following text in single quotation'please ask questions related to AI friday this is not place to answer these' nothing else "
     )
 
     rag_chain = (
@@ -74,12 +74,14 @@ if upload_file:
         | StrOutputParser()
     )
 
-    # Step 5: Ask summarization prompt
-    summary_prompt = "Please summarize this document based on the key topics:"
 
-    with st.spinner("Running RAG summarization..."):
-        result = rag_chain.invoke(summary_prompt)
+     # Step 5: User input for question
+    question = st.text_input("Ask your question")
 
-    # Display summary
-    st.subheader("Summary")
-    st.write(result)
+    if question:
+        with st.spinner("Running RAG summarization..."):
+            result = rag_chain.invoke(question)
+
+        # Display summary
+        st.subheader("Answer")
+        st.write(result)
